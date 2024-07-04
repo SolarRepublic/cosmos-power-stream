@@ -1,15 +1,16 @@
-# cosmos-ws-multiplixer
+# Cosmos WebSocket Multiplexer
 
-To install dependencies:
+![Advantages of multiplexing][docs/multiplexing.png]
 
-```bash
+## Getting Started
+
+Install:
+```sh
 bun install
 ```
 
-To run:
-
-```bash
-bun run src/server.ts
+Build:
+```sh
+bun run build
 ```
 
-This project was created using `bun init` in bun v1.1.15. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

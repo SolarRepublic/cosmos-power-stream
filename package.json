@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "build:docker-db": "docker build -t postgres-wsm .",
-    "run:docker-db": "docker run --name postgres-wsm -d -p 5432:5432 postgres-wsm"
+    "run:docker-db": "docker run --name postgres-wsm -d -p 5432:5432 postgres-wsm",
+    "build": "bun run build:docker-db",
+    "test": "bun run:docker-db && bun run src/indexer.ts"
   },
   "devDependencies": {
     "@blake.regalia/eslint-config-elite": "^0.4.4",
