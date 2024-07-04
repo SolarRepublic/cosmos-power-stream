@@ -1,0 +1,26 @@
+node_modules
+
+# build files
+**/dist
+**/build
+**/scrap
+/gen
+/lib
+/proto
+
+# private
+**/*.env
+**/*.local
+config.prod.toml
+
+# unwanted
+**/.DS_Store
+**/*.ignore
+**/*.log
+/.git-*
+/.git.*
+.yarn-integrity
+
+# editor-specific files and directories
+**/.vscode/
+

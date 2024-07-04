@@ -1,0 +1,69 @@
+{
+	"extends": [
+		"@blake.regalia/tsconfig/tsconfig.node.json"
+	],
+
+	"compilerOptions": {
+		// --------------------------------
+		// transpilation
+		// --------------------------------
+
+		// target modern ES
+		"target": "ES2022",
+		"module": "ESNext",
+		"lib": [
+			"ES2022",
+		],
+
+		"moduleDetection": "force",
+
+		// Bundler mode
+		"allowImportingTsExtensions": true,
+		"noEmit": true,
+
+		// --------------------------------
+		// preferences
+		// --------------------------------
+
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"skipDefaultLibCheck": true,
+
+		// ignore node.js internal type errors
+		"skipLibCheck": true,
+
+		// --------------------------------
+		// type-checking and type safety
+		// --------------------------------
+
+		"exactOptionalPropertyTypes": true,
+		"noPropertyAccessFromIndexSignature": true,
+
+		// type checking and type safety
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"strict": true,
+		"strictNullChecks": true,
+
+		// the following are deferred for linting:
+		// - allowUnreachableCode
+		// - allowUnusedLabels
+		// - noImplicitAny 
+		// - noFallthroughCasesInSwitch
+
+		// intentionally disabled
+		"noUncheckedIndexedAccess": false,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+
+		// prevent truncation of types in intellisense
+		"noErrorTruncation": true,
+
+		"newLine": "lf",
+		"allowJs": true,
+		"moduleResolution": "Bundler",
+		"forceConsistentCasingInFileNames": true,
+		"verbatimModuleSyntax": true,
+	}
+}
