@@ -1,6 +1,6 @@
 # Cosmos WebSocket Multiplexer
 
-![Advantages of multiplexing][docs/multiplexing.png]
+![Advantages of multiplexing](docs/multiplexing.png)
 
 ## Getting Started
 
