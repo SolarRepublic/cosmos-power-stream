@@ -1,4 +1,4 @@
-import {Client} from 'pg';
+import {Client, types} from 'pg';
 
 export const Y_POSTGRES = new Client({
 	host: process.env.POSTGRES_HOST || 'localhost',
@@ -10,3 +10,4 @@ export const Y_POSTGRES = new Client({
 
 await Y_POSTGRES.connect();
 
+export const psql_params = (c_params=0) => (): string => `$${++c_params}`;

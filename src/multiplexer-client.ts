@@ -6,7 +6,7 @@ import {__UNDEFINED, entries, is_object, is_string, try_sync} from '@blake.regal
 
 import {JsonRpcParamsError, type JsonRpcRouter} from './json-rpc';
 
-import {parse_query} from './parser';
+import {parse_event_query} from './parser';
 import {K_TEF_TX} from './upstream';
 
 export class MultiplexerClient {
@@ -35,7 +35,7 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 		if(!is_string(s_query)) throw new JsonRpcParamsError(`Wrong JSON type for query parameter in subscribe method; must be a string`);
 
 		// parse query string
-		const g_ast = parse_query(s_query);
+		const g_ast = parse_event_query(s_query);
 
 		// simple query
 		if('expr' === g_ast.type && ['='].includes(g_ast.op)) {
