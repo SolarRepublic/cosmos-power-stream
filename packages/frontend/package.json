@@ -1,0 +1,28 @@
+{
+  "name": "cosmos-power-stream-frontend",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev"
+  },
+  "devDependencies": {
+    "@blake.regalia/eslint-config-elite": "^0.4.4",
+    "@blake.regalia/tsconfig": "^0.2.0",
+    "@sveltejs/vite-plugin-svelte": "^3.1.1",
+    "@types/node": "^20.14.10",
+    "@types/web": "^0.0.151",
+    "@typescript-eslint/parser": "^7.16.0",
+    "eslint": "8",
+    "eslint-plugin-svelte3": "^4.0.0",
+    "less": "^4.2.0",
+    "svelte": "^4.2.18",
+    "svelte-preprocess": "^6.0.1",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3"
+  },
+  "dependencies": {
+    "@blake.regalia/belt": "^0.37.0",
+    "@noble/hashes": "^1.4.0",
+    "@solar-republic/types": "^0.2.12"
+  }
+}

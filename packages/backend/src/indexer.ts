@@ -1,33 +1,31 @@
 import type {TendermintEvent, TxResultWrapper} from '@solar-republic/neutrino';
 
-import {F_IDENTITY, __UNDEFINED, base64_to_bytes, bytes, bytes_to_base64, bytes_to_text, collapse, entries, is_undefined, map_entries, parse_json_safe, sha256, text_to_bytes} from '@blake.regalia/belt';
-import {Protobuf} from '@solar-republic/cosmos-grpc';
+import {F_IDENTITY, __UNDEFINED, base64_to_bytes, bytes_to_base64, bytes_to_text, collapse, entries, sha256, text_to_bytes} from '@blake.regalia/belt';
 
-
-import {H_ROUTING, MultiplexerClient} from './multiplexer-client';
+import {encode_txres} from './encoding';
 import {Y_POSTGRES, psql_params} from './postgres';
+import {K_TES_TX} from './upstream';
+import {NL_MAX_VALUE_TEXT} from '../../shared/src/config';
+import {R_BIGINTISH} from '../../shared/src/event-query';
 
-const R_BIGINTISH = /^([-+]?\d{1,78})([a-z\d_]{1,16}|ibc\/[A-F0-9]{64}|factory\/\S{,120})?$/;
-const NL_MAX_VALUE_TEXT = 8192 - 1;
+// // new block events
+// K_TES_BLOCK.register({
+// 	async external(g_message, e_rpc) {
+// 		const {
+// 			data: g_data,
+// 			events: h_events,
+// 		} = g_message as TendermintEvent;
 
-(async() => {
-	const k_mpc = new MultiplexerClient();
+// 		debugger;
+// 		console.log(g_message);
+// 	},
+// });
 
-	await H_ROUTING['subscribe'].call(k_mpc, {
-		query: 'tm.event="NewBlock"',
-	}, async(g_message, e_rpc) => {
-		const {
-			data: g_data,
-			events: h_events,
-		} = g_message as TendermintEvent;
-
-		debugger;
-		console.log(g_message);
-	});
-
-	await H_ROUTING['subscribe'].call(k_mpc, {
-		query: 'tm.event="Tx"',
-	}, async(g_message, e_rpc) => {
+// transaction events
+K_TES_TX.register({
+	// register internal handler
+	async internal(g_message, g_error) {
+		// destructure message
 		const {
 			data: g_data,
 			events: h_events,
@@ -36,10 +34,10 @@ const NL_MAX_VALUE_TEXT = 8192 - 1;
 		// destructure data
 		const {
 			value: {
+				TxResult: g_unwrapped,
 				TxResult: {
 					height: sg_height,
 					tx: sb64_tx,
-					result: g_result,
 				},
 			},
 		} = g_data;
@@ -50,63 +48,13 @@ const NL_MAX_VALUE_TEXT = 8192 - 1;
 		// timing
 		console.time(si_hash);
 
-		// attempt to parse log as JSON
-		const g_log = parse_json_safe<{
-			events?: {
-				type: string;
-				attributes: {
-					key: string;
-					value: string;
-				}[];
-			}[];
-		}>(g_result?.log || '');
-
-		// ref the events array
-		const a_log_events = g_log?.events;
-
-		// clone log object
-		const g_other = {...g_log};
-
-		// remove events from it
-		delete g_other.events;
-
-		// protobuf-encode result.log
-		const atu8_log = Protobuf()
-			// log.events?
-			.B((a_log_events || [])
-				.map(g_event => Protobuf().s(g_event.type).B(
-					g_event.attributes.map(g_attr => Protobuf().s(g_attr.key).s(g_attr.value).o)
-				).o)
-			)
-			// {...log.<other>}
-			.B(map_entries(g_other, ([si_key, w_value]) => Protobuf().s(si_key).s(JSON.stringify(w_value)).o))
-			// plain log text (i.e., not JSON)
-			.s(is_undefined(g_log)? g_result?.log: __UNDEFINED)
-			.o;
-
-		// protobuf-encode result.events[]
-		const atu8_result_events = Protobuf().B((g_result?.events || [])
-			.map(g_event => Protobuf().s(g_event.type).B(
-				g_event.attributes?.map(g_attr => Protobuf().s(g_attr.key).s(g_attr.value).v(!!g_attr.index).o)
-			).o)
-		).o;
-
-		// protobuf-encode the whole result struct
-		const atu8_result = Protobuf()
-			.g(g_result?.gas_wanted)
-			.g(g_result?.gas_used)
-			.b(base64_to_bytes(g_result?.data || ''))
-			.b(atu8_log)
-			.b(atu8_result_events)
-			.v(g_result?.code)
-			.s(g_result?.codespace)
-			.s(g_result?.info)
-			.o;
+		// encode TxResult
+		const atu8_data = encode_txres(g_unwrapped);
 
 		// create transaction
 		const g_ins_tx = await Y_POSTGRES.query(`
-			INSERT INTO transactions(height, tx_bytes, tx_result) VALUES($1, $2, $3) RETURNING id
-		`, [sg_height!, base64_to_bytes(sb64_tx!), atu8_result]);
+			INSERT INTO transactions(height, tx_bytes, tx_data) VALUES($1, $2, $3) RETURNING id
+		`, [sg_height!, base64_to_bytes(sb64_tx!), atu8_data]);
 
 		// transaction row ID
 		const sir_tx = g_ins_tx.rows[0].id as string;
@@ -254,5 +202,5 @@ const NL_MAX_VALUE_TEXT = 8192 - 1;
 
 		// timing
 		console.timeEnd(si_hash);
-	});
-})();
+	},
+});

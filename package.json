@@ -1,28 +1,8 @@
 {
-  "name": "cosmos-ws-multiplixer",
-  "module": "src/server.ts",
-  "type": "module",
-  "scripts": {
-    "build:docker-db": "docker build -t postgres-wsm .",
-    "run:docker-db": "docker run --name postgres-wsm -d -p 5432:5432 postgres-wsm",
-    "build": "bun run build:docker-db",
-    "test": "bun run:docker-db && bun run src/indexer.ts"
-  },
-  "devDependencies": {
-    "@blake.regalia/eslint-config-elite": "^0.4.4",
-    "@blake.regalia/tsconfig": "^0.2.0",
-    "@solar-republic/neutrino": "^1.5.0",
-    "@solar-republic/types": "^0.2.12",
-    "@types/bun": "latest",
-    "@types/pg": "^8.11.6",
-    "eslint": "8"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@blake.regalia/belt": "^0.37.0",
-    "pg": "^8.12.0",
-    "ws": "^8.17.1"
-  }
+	"devDependencies": {
+		"monaco-editor": "^0.50.0"
+	},
+	"dependencies": {
+		"@noble/hashes": "^1.4.0"
+	}
 }

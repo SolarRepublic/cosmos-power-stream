@@ -1,0 +1,28 @@
+{
+	"extends": [
+		"@blake.regalia/tsconfig/tsconfig.web.json",
+	],
+
+	"compilerOptions": {
+		"baseUrl": ".",
+		"outDir": "dist",
+
+		"declaration": true,
+		"declarationDir": "dist",
+
+		"module": "ESNext",
+
+		"verbatimModuleSyntax": true,
+		"moduleResolution": "Bundler",
+
+		"skipDefaultLibCheck": true,
+		"skipLibCheck": true,
+	},
+
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.svelte",
+		"*.ts",
+		".eslintrc.cjs",
+	],
+}

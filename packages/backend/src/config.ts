@@ -24,3 +24,5 @@ export const GC_APP: AppConfig = {
 
 	},
 };
+
+export const N_SEARCH_BATCH_SIZE = 128;

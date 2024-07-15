@@ -1,6 +1,13 @@
-# Cosmos WebSocket Multiplexer
+# Cosmos Power Stream
 
-> Enables Cosmos node providers to reduce Tendermint/CometBFT event subscription loads on their RPC nodes by placing a set of these WebSocket multiplexers between the node and their clients, scaling elastically as needed.
+> TLDR; sits in-between Cosmos RPC node and clients, indexing all Tendermint/CometBFT events emitted by the node [over WebSocket](https://docs.cometbft.com/v0.38/core/subscription) and multiplexing WebSocket subscriptions between node and clients.
+
+## Features
+ - Reduces load on Cosmos node providers' RPC nodes and allows scaling out using simpler hardware
+ - Search for transactions in recent history by querying the event attributes
+ - Filter live events using advanced queries, e.g., `transfer.amount > 150uscrt AND message.module='compute'`
+ - Infinitley scale by chaining multiple layers together (with or without indexing enabled)
+ - Write, test, and visualize queries using the interactive front-end
 
 
 ### What?
