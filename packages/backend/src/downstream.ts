@@ -1,8 +1,8 @@
 import type {QueryFunction} from '../../shared/src/event-query';
 import type {TendermintEvent, TxResultWrapper} from '@solar-republic/neutrino';
 
-import {R_BIGINTISH} from '../../shared/src/event-query';
 import {K_TES_TX} from './upstream';
+import {R_BIGINTISH} from '../../shared/src/event-query';
 
 // global list of evaluators
 export const HM_EVALUATORS = new Map<QueryFunction, (g_result: TendermintEvent<TxResultWrapper>) => void>();

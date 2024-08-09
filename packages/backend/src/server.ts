@@ -1,3 +1,5 @@
+import type {PlainJsonRpcRouter} from '../../shared/src/json-rpc';
+
 import {parseArgs} from 'node:util';
 
 import {WebSocketServer} from 'ws';
@@ -34,7 +36,7 @@ y_server.on('connection', (d_ws) => {
 	// 
 	const k_client = new MultiplexerClient();
 
-	new JsonRpc(d_ws as WebSocket, k_client, H_ROUTING);
+	new JsonRpc(d_ws as WebSocket, k_client, H_ROUTING as unknown as PlainJsonRpcRouter<MultiplexerClient>);
 });
 
 //

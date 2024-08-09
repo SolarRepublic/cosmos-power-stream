@@ -25,4 +25,6 @@ export const GC_APP: AppConfig = {
 	},
 };
 
-export const N_SEARCH_BATCH_SIZE = 128;
+export const N_SEARCH_BATCH_SIZE = 256;
+
+export const N_ATTRIBUTE_LIMIT_MAX = 1024;

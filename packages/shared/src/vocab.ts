@@ -1,11 +1,11 @@
-import type {JsonObject, JsonValue} from '@blake.regalia/belt';
+import type {Dict, JsonObject, JsonValue} from '@blake.regalia/belt';
 import type {TxResultWrapper} from '@solar-republic/neutrino';
 
 export type GenericVocab = {
 	[si_method: string]: {
 		params: JsonObject;
 		returns: JsonValue;
-		streams: JsonValue | void;
+		streams?: JsonValue | void;
 	};
 };
 
@@ -28,7 +28,6 @@ export type ServiceVocab = {
 				version: string;
 			};
 		};
-		streams: void;
 	};
 
 	subscribe: {
@@ -41,6 +40,18 @@ export type ServiceVocab = {
 		streams: StreamEvent;
 	};
 
+	unsubscribe: {
+		params: {
+			query: string;
+		};
+		returns: {};
+	};
+
+	unsubscribe_all: {
+		params: {};
+		returns: {};
+	};
+
 	parse_query: {
 		params: {
 			query: string;
@@ -48,7 +59,6 @@ export type ServiceVocab = {
 		returns: {
 			ast: JsonObject;
 		};
-		streams: void;
 	};
 
 	search_txs: {
@@ -61,6 +71,16 @@ export type ServiceVocab = {
 		streams: {
 			batch?: StreamEvent[];
 			finished?: true;
+		};
+	};
+
+	attributes: {
+		params: {
+			limit: number;
+			offset: number;
+		};
+		returns: {
+			keys: string[];
 		};
 	};
 };

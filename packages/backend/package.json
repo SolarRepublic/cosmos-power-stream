@@ -6,6 +6,7 @@
   "scripts": {
     "build:docker-db": "docker build -t postgres-wsm .",
     "run:docker-db": "docker run --name postgres-wsm -d -p 5432:5432 postgres-wsm",
+    "build:app": "tsc && tsc-esm-fix --target=dist",
     "build": "bun run build:docker-db",
     "test": "bun run run:docker-db && bun run start",
     "start": "bun run src/indexer.ts"
@@ -28,6 +29,6 @@
     "@blake.regalia/belt": "^0.37.0",
     "@solar-republic/cosmos-grpc": "^0.17.1",
     "pg": "^8.12.0",
-    "ws": "^8.17.1"
+    "ws": "^8.18.0"
   }
 }

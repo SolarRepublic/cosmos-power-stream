@@ -118,6 +118,9 @@ export class EventQuery {
 	 * @returns 
 	 */
 	static parse(s_query: string): EventQuery {
+		// trim
+		s_query = s_query.trim();
+
 		// set match index to beginning of query
 		let i_match = 0;
 
@@ -569,12 +572,24 @@ export class EventQuery {
 
 				// unary
 				if(A_OPERATORS_UNARY.includes(s_op as QueryExprOperatorUnary)) {
+					// exists
+					if('exists' === s_op) {
+						// sx_condition = `p.path_text=${this.param(s_key)}`;
+						sx_condition = `filter_event_path_exists(${this.param(s_key)}, '')`;
+					}
 					// not exists
-					debugger;
+					else if('not exists' === s_op) {
 
-					sx_condition = `p.path_text=${this.param(s_key)} AND ${sx_value}`;
+						debugger;
+					}
+					// other
+					else {
+						throw Error(`Unsupported unary operator "${s_op}"`);
+					}
 
-					sx_value = ``;
+					// sx_condition = `p.path_text=${this.param(s_key)} AND ${sx_value}`;
+
+					// sx_value = ``;
 				}
 				// equality
 				else if(A_OPERATORS_EQUALITY.includes(s_op as QueryExprOperatorEquality)) {
@@ -604,7 +619,7 @@ export class EventQuery {
 					sx_condition = `${sx_method}(${[
 						this.param(s_key),
 						this.param(s_arg),
-					]})`
+					].join(',')})`
 				}
 				// inequality (quantity)
 				else if(A_OPERATORS_INEQUALITY.includes(s_op as QueryExprOperatorInquality)) {
@@ -663,7 +678,7 @@ export class EventQuery {
 		});
 
 		return {
-			output: `select t.* from transactions t\n${a_joins.map(s => s+'\n').join('')}where ${sx_body}`,
+			output: `select distinct t.* from transactions t\n${a_joins.map(s => s+'\n').join('')}where ${sx_body} order by t.id asc`,
 			values: a_values,
 		};
 	}
@@ -688,7 +703,7 @@ export class EventQuery {
 
 			expr(g) {
 				const g_clone: JsonObject = {...g};
-				delete g_clone.id;
+				delete (g_clone as any).id;
 				return g_clone;
 			},
 		}).output;

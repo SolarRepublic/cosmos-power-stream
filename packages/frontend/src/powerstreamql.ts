@@ -91,7 +91,7 @@ export function register_powerstreamql(y_monaco: typeof Monaco) {
 			event: [
 				[/\b((?:not\s+)?(?:exists))\b/, sw('keyword.operator.logical','cont')],
 				[/like/, sw('keyword.operator.semantic.like', 'like_value')],
-				[/[><!]?=|[><]|includes|in/, sw('keyword.operator.relational', 'value')],
+				[/[><!]?=|[><]|includes|in/, sw('keyword.operator.relational', 'like_value')],
 				{include:'end'},
 			],
 
@@ -101,19 +101,12 @@ export function register_powerstreamql(y_monaco: typeof Monaco) {
 				{include:'end'},
 			],
 
-			value: [
-				[/'([^\\']+|\\[^])*'/, sw('string.irk', 'cont')],
-				[/"([^\\"]+|\\[^])*"/, sw('string.dirk', 'cont')],
-				[/`([^\\`]+|\\[^])*`/, sw('string.tick', 'cont')],
-				[/([-+]?)(\d+)/, sw('constant.numeric.decimal', 'numeric')],
-				{include:'end'},
-			],
-
 			like_value: [
 				[/'/, sw('string.irk', 'like_irk')],
 				[/"/, sw('string.dirk', 'like_dirk')],
 				[/`/, sw('string.tick', 'like_tick')],
-				{include:'value'},
+				[/([-+]?)(\d+)/, sw('constant.numeric.decimal', 'numeric')],
+				{include:'end'},
 			],
 
 			like_irk: [

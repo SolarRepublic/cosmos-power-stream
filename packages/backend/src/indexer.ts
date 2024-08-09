@@ -1,5 +1,3 @@
-import type {TendermintEvent, TxResultWrapper} from '@solar-republic/neutrino';
-
 import {F_IDENTITY, __UNDEFINED, base64_to_bytes, bytes_to_base64, bytes_to_text, collapse, entries, sha256, text_to_bytes} from '@blake.regalia/belt';
 
 import {encode_txres} from './encoding';
@@ -24,12 +22,12 @@ import {R_BIGINTISH} from '../../shared/src/event-query';
 // transaction events
 K_TES_TX.register({
 	// register internal handler
-	async internal(g_message, g_error) {
+	async internal(g_message) {
 		// destructure message
 		const {
 			data: g_data,
 			events: h_events,
-		} = g_message as TendermintEvent<TxResultWrapper>;
+		} = g_message;
 
 		// destructure data
 		const {
@@ -151,14 +149,11 @@ K_TES_TX.register({
 					WITH input_rows(value_hash, value_bigint, value_unit, value_text, value_bytes) AS (
 						VALUES ${a_values_distinct.map((s_value, i_path) => '('+[
 							/* eslint-disable @typescript-eslint/indent */
-							// `$${(i_path*5)+1}`,
 							f_param(),
 							`CAST(${f_param()} AS DECIMAL)`,
 							f_param(),
 							f_param(),
-							// `$${(i_path*4)+3}`,
 							`CAST(${f_param()} AS BYTEA)`,
-							// f_param(),
 						].join(', ')+')').join(',') /* eslint-enable */}
 					), ins AS (
 						INSERT INTO event_values(value_hash, value_bigint, value_unit, value_text, value_bytes) 

@@ -21,7 +21,7 @@ importers:
         specifier: ^5.0.0
         version: 5.5.3
       ws:
-        specifier: ^8.17.1
+        specifier: ^8.18.0
         version: 8.18.0
     devDependencies:
       '@blake.regalia/eslint-config-elite':

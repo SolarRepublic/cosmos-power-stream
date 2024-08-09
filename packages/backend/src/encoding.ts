@@ -3,7 +3,7 @@ import type {TendermintAbciTxResult} from '@solar-republic/cosmos-grpc/tendermin
 
 import type {CwBase64, WeakUintStr} from '@solar-republic/types';
 
-import {__UNDEFINED, base64_to_bytes, bytes_to_base64, from_entries, is_undefined, map_entries, parse_json, parse_json_safe, stringify_json} from '@blake.regalia/belt';
+import {__UNDEFINED, base64_to_bytes, bytes_to_base64, from_entries, is_array, is_undefined, map_entries, parse_json, parse_json_safe, stringify_json} from '@blake.regalia/belt';
 import {decode_protobuf, ProtoHint, Protobuf} from '@solar-republic/cosmos-grpc';
 
 
@@ -174,7 +174,7 @@ function decode_tx_logs(atu8_tx_logs: Uint8Array) {
 		ProtoHint.MESSAGE,
 	], [decode_tx_logs_log]);
 
-	return a_logs;
+	return '['+(a_logs as string[]).join(',')+']';
 }
 
 function decode_tx_result_events_event_attribute(atu8_attribute: Uint8Array) {
@@ -268,7 +268,7 @@ function decode_tx_result(atu8_tx_result: Uint8Array) {
 		log: s_log,
 		gas_wanted: sg_gas_wanted,
 		gas_used: sg_gas_used,
-		data: bytes_to_base64(atu8_data) as CwBase64,
+		data: atu8_data? bytes_to_base64(atu8_data) as CwBase64: __UNDEFINED,
 		events: a_events,
 	};
 }

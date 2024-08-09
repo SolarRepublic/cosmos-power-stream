@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 	import type {JsonRpc, JsonRpcClient} from '../../../shared/src/json-rpc';
+	import type { ServiceVocab } from '../../../shared/src/vocab';
 
 	import {sha256} from '@noble/hashes/sha256';
 	import {createEventDispatcher, onDestroy, onMount} from 'svelte';
@@ -8,7 +9,7 @@
 	import {register_powerstreamql, SI_POWERSTREAMQL_LANGUAGE, SI_POWERSTREAMQL_THEME} from '../powerstreamql';
 	import monaco from '../monaco';
 
-	export let k_rpc: JsonRpc<JsonRpcClient>;
+	export let k_rpc: JsonRpc<JsonRpcClient, ServiceVocab>;
 
 	let y_editor: Monaco.editor.IStandaloneCodeEditor;
 	let y_monaco: typeof Monaco;
@@ -29,6 +30,7 @@
 
 	let a_tabs: Tab[] = [];
 	let g_tab_selected: Tab | null = null;
+	let a_attr_keys: string[] = [];
 
 	function ins_tab(s_init: string, b_set=false): Tab {
 		const y_model = y_monaco.editor.createModel(
@@ -89,6 +91,28 @@
 		});
 
 		ins_tab(S_DEFAULT_EXAMPLE, true);
+
+		// load attributes
+		const g_res = await k_rpc.call('attributes', {
+			limit: 1024,
+			offset: 0,
+		});
+
+		a_attr_keys = g_res.keys;
+
+		y_monaco.languages.registerCompletionItemProvider(SI_POWERSTREAMQL_LANGUAGE, {
+			provideCompletionItems(y_model, y_position, y_context, y_token) {
+				 return {
+					suggestions: a_attr_keys.map((s_key) => ({
+						label: s_key,
+						kind: monaco.languages.CompletionItemKind.Keyword,
+						insertText: s_key,
+						detail: '',
+						range: undefined as unknown as Monaco.IRange,
+					})),
+				 };
+			},
+		});
 	});
 
 	onDestroy(() => {

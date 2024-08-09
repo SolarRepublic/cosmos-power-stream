@@ -1,8 +1,8 @@
-import type {Promisable} from '@blake.regalia/belt';
+import type {JsonObject, Promisable} from '@blake.regalia/belt';
 import type {JsonRpcResponse, TendermintEvent, TxResultWrapper} from '@solar-republic/neutrino';
 import type {WeakUintStr} from '@solar-republic/types';
 
-import {F_NOOP, __UNDEFINED, parse_json_safe} from '@blake.regalia/belt';
+import {F_NOOP, __UNDEFINED, parse_json_safe, stringify_json} from '@blake.regalia/belt';
 import {TendermintWs} from '@solar-republic/neutrino';
 
 import {GC_APP} from './config';
@@ -44,26 +44,32 @@ class TendermintEventStream<g_type> {
 export const G_NODE_INFO = await (async() => {
 	const d_res = await fetch(`${P_RPC_DEFAULT}/status`);
 	const {
-		result: g_result,
-	} = await d_res.json();
-
-	return g_result.node_info as {
-		protocol_version: {
-			p2p: string;
-			block: string;
-			app: string;
-		};
-		id: string;
-		listen_addr: string;
-		network: string;
-		version: string;
-		channels: string;
-		moniker: string;
-		other: {
-			tx_index: 'on' | 'off';
-			rpc_address: string;
+		result: {
+			node_info: g_info,
+		},
+	} = await d_res.json() as {
+		result: {
+			node_info: {
+				protocol_version: {
+					p2p: string;
+					block: string;
+					app: string;
+				};
+				id: string;
+				listen_addr: string;
+				network: string;
+				version: string;
+				channels: string;
+				moniker: string;
+				other: {
+					tx_index: 'on' | 'off';
+					rpc_address: string;
+				};
+			};
 		};
 	};
+
+	return g_info;
 })();
 
 export const K_TES_TX = new TendermintEventStream<TendermintEvent<TxResultWrapper>>();
@@ -147,7 +153,7 @@ export const K_WS_BLOCK = await TendermintWs(P_RPC_DEFAULT, `tm.event='NewBlock'
 		// if(g_error) {
 		// }
 
-		throw Error(g_error);
+		throw Error(stringify_json(g_error));
 	}
 });
 

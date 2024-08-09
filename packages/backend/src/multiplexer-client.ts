@@ -1,14 +1,14 @@
 import type {JsonRpcClient, JsonRpcRouter} from '../../shared/src/json-rpc';
 
-import type {JsonObject} from '@blake.regalia/belt';
-
+import type {ServiceVocab} from '../../shared/src/vocab';
+import type {JsonObject, Dict} from '@blake.regalia/belt';
+import type {TendermintAbciExecTxResult} from '@solar-republic/cosmos-grpc/tendermint/abci/types';
 import type {TendermintEvent, TxResultWrapper} from '@solar-republic/neutrino';
-
 import type {CwBase64, WeakUintStr} from '@solar-republic/types';
 
-import {__UNDEFINED, bytes_to_base64, bytes_to_text, is_string, timeout, values} from '@blake.regalia/belt';
+import {__UNDEFINED, bytes_to_base64, bytes_to_text, is_number, is_string, is_undefined, timeout, values} from '@blake.regalia/belt';
 
-import {N_SEARCH_BATCH_SIZE} from './config';
+import {N_ATTRIBUTE_LIMIT_MAX, N_SEARCH_BATCH_SIZE} from './config';
 import {HM_EVALUATORS} from './downstream';
 import {decode_tx_data as decode_txres} from './encoding';
 import {Y_POSTGRES} from './postgres';
@@ -16,7 +16,6 @@ import {G_NODE_INFO} from './upstream';
 import {EventQuery, type QueryFunction} from '../../shared/src/event-query';
 import {JsonRpcParamsError} from '../../shared/src/json-rpc';
 import * as G_PACKAGE_JSON from '../package.json' with {type:'json'};
-
 
 
 export class MultiplexerClient implements JsonRpcClient {
@@ -53,7 +52,7 @@ const parse_query = (h_params: JsonObject): EventQuery => {
 	return EventQuery.parse(s_query);
 };
 
-export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
+export const H_ROUTING: JsonRpcRouter<MultiplexerClient, ServiceVocab> = {
 	/**
 	 * Info about this module
 	 */
@@ -83,7 +82,7 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 		const f_query = k_query.toFunction();
 
 		// add to evaluator map
-		HM_EVALUATORS.set(f_query, f_respond);
+		HM_EVALUATORS.set(f_query, f_respond as NonNullable<ReturnType<typeof HM_EVALUATORS['get']>>);
 
 		// remove when socket closes
 		this._a_query_funcs.push(f_query);
@@ -135,7 +134,7 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 	 * Tendermint/CometBFT WebSocket JSON-RPC unsubscribe_all method
 	 * @returns 
 	 */
-	unsubscribe_all() {
+	unsubscribe_all(this: MultiplexerClient) {
 		// forward to instance
 		this.unsubscribeAll();
 
@@ -157,7 +156,7 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 	 * 
 	 * @param h_params 
 	 */
-	async search_txs(h_params, f_respond) {
+	search_txs(h_params, f_respond) {
 		// parse query
 		const k_query = parse_query(h_params);
 
@@ -186,6 +185,8 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 				rows: a_rows,
 			} = g_res_search;
 
+			const as_seen = new Set<string>();
+
 			// start iterating through results in batches
 			for(let i_row=0; i_row<a_rows.length; i_row+=N_SEARCH_BATCH_SIZE) {
 				// prep results
@@ -194,8 +195,11 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 				// prep query
 				const a_txids: string[] = [];
 
+				// select subset of rows
+				const a_slice = a_rows.slice(i_row, i_row+N_SEARCH_BATCH_SIZE);
+
 				// each row in batch
-				for(const g_row of a_rows.slice(i_row, i_row+N_SEARCH_BATCH_SIZE)) {
+				for(const g_row of a_slice) {
 					// destructure row
 					const {
 						id: si_row,
@@ -217,6 +221,15 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 						result: g_result,
 					} = decode_txres(atu8_tx_data);
 
+					if(as_seen.has(si_row)) {
+						debugger;
+					}
+
+					as_seen.add(si_row);
+
+					// inspect the type of `g_result.log`
+					debugger;
+
 					// reconstruct transaction
 					h_txs[si_row] = {
 						data: {
@@ -226,7 +239,7 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 									height: sg_height,
 									index: n_index,
 									tx: atu8_tx_bytes? bytes_to_base64(atu8_tx_bytes) as CwBase64: __UNDEFINED,
-									result: g_result,
+									result: g_result as TendermintAbciExecTxResult,
 								},
 							},
 						},
@@ -245,7 +258,7 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 
 				// 
 				let si_tx_local = '';
-				let h_events_local = {};
+				let h_events_local: Dict<string[]> = {};
 
 				// rebuild dict
 				for(const g_row of g_res_events.rows) {
@@ -267,11 +280,11 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 
 					// different tx from previous
 					if(si_tx !== si_tx_local) {
-						h_events_local = h_txs[si_tx_local=si_tx]!.events;
+						h_events_local = h_txs[si_tx_local=si_tx].events;
 					}
 
 					// add value to list
-					(h_events_local[s_path] ??= []).push(s_value);
+					(h_events_local[s_path] ??= []).push(s_value!);
 				}
 
 				// send over socket
@@ -310,6 +323,51 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient> = {
 		// return AST
 		return {
 			ast: k_query.export(),
+		};
+	},
+
+	async attributes(h_params) {
+		// ref limit
+		const n_limit = h_params?.['limit'];
+
+		// missing limit
+		if(is_undefined(n_limit)) throw new JsonRpcParamsError(`Missing limit parameter in attributes method`);
+
+		// wrong type
+		if(!is_number(n_limit)) throw new JsonRpcParamsError(`Wrong JSON type for limit parameter in attributes method; must be a number`);
+
+		// ref offset
+		const n_offset = h_params?.['offset'];
+
+		// missing offset
+		if(is_undefined(n_offset)) throw new JsonRpcParamsError(`Missing offset parameter in attributes method`);
+
+		// wrong type
+		if(!is_number(n_limit)) throw new JsonRpcParamsError(`Wrong JSON type for offset parameter in attributes method; must be a number`);
+
+		// limit too great
+		if(n_limit > N_ATTRIBUTE_LIMIT_MAX) throw new JsonRpcParamsError(`The limit parameter can only have a maximum value of ${N_ATTRIBUTE_LIMIT_MAX}`);
+
+		// must be non-negative integers
+		if(n_limit < 0 || n_offset < 0 || !Number.isInteger(n_limit) || !Number.isInteger(n_offset)) throw new JsonRpcParamsError(`Both limit and offset values must be non-negative integers`);
+
+		// zero limit
+		if(!n_limit) return {keys:[]};
+
+		// query
+		const g_res = await Y_POSTGRES.query(`
+			SELECT p.path_text FROM event_paths p
+			WHERE p.path_text NOT LIKE 'wasm.%'
+			ORDER BY p.id LIMIT $1 OFFSET $2
+		`, [n_limit, n_offset]);
+
+		// destructure
+		const {
+			rows: a_rows,
+		} = g_res;
+
+		return {
+			keys: a_rows.map(g => g.path_text),
 		};
 	},
 };

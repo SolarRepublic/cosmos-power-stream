@@ -1,4 +1,4 @@
-import type {JsonObject, JsonValue, Promisable} from '@blake.regalia/belt';
+import type {JsonObject, JsonValue, Promisable, AsJson} from '@blake.regalia/belt';
 import type {GenericVocab} from './vocab';
 
 import {__UNDEFINED, assign, bytes_to_text, defer, is_bytes, is_dict, is_error, is_number, is_string, parse_json_safe, stringify_json, try_sync} from '@blake.regalia/belt';
@@ -12,10 +12,22 @@ export type JsonRpcError = {
 
 type JsonRpcResponder<w_result extends JsonValue=JsonValue> = (z_result: w_result, e_error?: JsonRpcError) => void;
 
+type WebSocketMessageEvent = MessageEvent | Parameters<NonNullable<WebSocket['onmessage']>>[0];
+
 
 // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
-export type JsonRpcRouter<w_instance> = {
+export type PlainJsonRpcRouter<w_instance> = {
 	[si_method: string]: (this: w_instance, h_params: Dict<JsonValue>, f_respond: JsonRpcResponder) => Promisable<JsonValue | void | undefined>;
+};
+
+export type JsonRpcRouter<w_instance, h_vocab extends GenericVocab> = {
+	[si_method in keyof h_vocab]: (
+		this: w_instance,
+		h_params: h_vocab[si_method]['params'],
+		f_respond: void extends h_vocab[si_method]['streams']
+			? void
+			: JsonRpcResponder<AsJson<h_vocab[si_method]['streams']>>,
+	) => Promisable<h_vocab[si_method]['returns']>;
 };
 
 export class JsonRpcParamsError extends Error {}
@@ -41,10 +53,10 @@ export class JsonRpc<
 	constructor(
 		protected _d_ws: WebSocket,
 		protected _k_instance: k_instance,
-		protected _h_router: JsonRpcRouter<k_instance>={}
+		protected _h_router: PlainJsonRpcRouter<k_instance>={}
 	) {
 		_d_ws.onmessage = d_event => void this.message(d_event);
-		_d_ws.onclose = d_event => void _k_instance.close(d_event);
+		_d_ws.onclose = d_event => void _k_instance.close(d_event as unknown as CloseEvent);
 	}
 
 	terminate(xc_code: number, s_reason='') {
@@ -56,6 +68,7 @@ export class JsonRpc<
 	 * @param g_message - arbitrary JSON to spread into the message
 	 */
 	send(g_message: JsonObject): void {
+		console.debug(`> ${stringify_json(g_message).slice(0, 256)}`);
 		this._d_ws.send(stringify_json({
 			jsonrpc: '2.0',
 			...g_message,
@@ -65,14 +78,14 @@ export class JsonRpc<
 	async call<si_method extends Extract<keyof g_vocab_remote, string>, g_method extends g_vocab_remote[si_method]>(
 		si_method: si_method,
 		g_params: g_method['params'],
-		f_receive?: JsonRpcResponder<g_method['streams']>
+		f_receive?: JsonRpcResponder<AsJson<g_method['streams']>>
 	): Promise<g_method['returns']> {
 		let i_msg = c_msgs++;
 
 		const [dp_respond, fke_respond] = defer();
 
 		this._h_results[i_msg] = (w_result, w_error) => {
-			this._h_results[i_msg] = f_receive;
+			this._h_results[i_msg] = f_receive as JsonRpcResponder;
 			fke_respond(w_result as any, w_error as any);
 		};
 
@@ -105,7 +118,7 @@ export class JsonRpc<
 		this.error(-32600, 'Invalid request', s_data, z_id);
 	}
 
-	async message(d_event: MessageEvent<any>): Promise<void> {
+	async message(d_event: WebSocketMessageEvent): Promise<void> {
 		const z_message = d_event.data;
 		let sx_message = '';
 

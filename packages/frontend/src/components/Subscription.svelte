@@ -4,8 +4,8 @@
 	import type {ServiceVocab} from '../../../shared/src/vocab';
 	import type {LiveSubscription} from '../types';
 
-	import {try_async, deduplicate} from '@blake.regalia/belt';
-	import {onMount} from 'svelte';
+	import {try_async, deduplicate, try_sync} from '@blake.regalia/belt';
+	import {createEventDispatcher, onMount} from 'svelte';
 	import {walk, type AstNode} from '../../../shared/src/event-query';
 	import {block_explorer_tx} from '../util';
 
@@ -18,11 +18,16 @@
 		events: Dict<string[]>;
 	}[] = [];
 
-	let b_reverse_order = false;
+	let b_reverse_order = true;
+	let b_stopped = false;
 
 	let g_subscribe: ServiceVocab['subscribe']['returns'] | undefined;
 	let z_error: JsonRpcError | Error | 0;
 	let as_paths = new Set<string>();
+
+	const dispatch = createEventDispatcher<{
+		close: null;
+	}>();
 
 	onMount(async() => {
 		// // call subscribe method
@@ -130,7 +135,58 @@
 			as_paths.delete('tx.hash');
 			as_paths.delete('tx.height');
 		}
+
+		// now subscribe
+		await try_async(() => k_rpc.call('subscribe', {
+			query: g_subscription.query,
+		}, (g_data) => {
+			const {
+				data: {
+					value: {
+						TxResult: {
+							height: sg_height,
+							result: g_result,
+						},
+					},
+				},
+				events: h_events,
+			} = g_data;
+
+			// skip non-results
+			if(!h_events) return;
+
+			// add to list
+			a_txs.push({
+				height: sg_height!,
+				hash: h_events['tx.hash']![0],
+				events: h_events,
+			});
+
+			// reactive update
+			a_txs = a_txs;
+		}));
 	});
+
+	async function unsubscribe() {
+		b_stopped = true;
+
+		// unsubscribe
+		await try_async(() => k_rpc.call('unsubscribe', {
+			query: g_subscription.query,
+		}));
+	}
+
+	function reverse_order() {
+		b_reverse_order = !b_reverse_order;
+
+		a_txs = a_txs.reverse();
+	}
+
+	async function close() {
+		await unsubscribe();
+
+		dispatch('close', null);
+	}
 
 </script>
 
@@ -139,6 +195,35 @@
 		color: #004;
 		background: rgba(210, 210, 255, 0.7);
 		border-radius: 4px;
+		margin: 6px 0;
+	}
+
+	.header {
+		display: flex;
+		margin: 4px;
+		font-size: 12px;
+
+		&>* {
+			display: inline-block;
+			margin: 4px;
+
+			display: inline-flex;
+			gap: 0;
+		}
+
+		button {
+			border: 1px solid #555;
+			display: inline-flex;
+			gap: 4px;
+			align-items: center;
+			justify-content: center;
+			background-color: rgba(0,0,0,0.1);
+			color: #212121;
+
+			&:nth-child(n+1) {
+				margin-left: -1px;
+			}
+		}
 	}
 	
 	table {
@@ -197,17 +282,78 @@
 			font-style: italic;
 		}
 	}
+
+	.tagged-group {
+		display: flex;
+		gap: 6px;
+	}
+
+	.tagged-value {
+		display: inline-block;
+		padding: 6px 6px 6px 0;
+		background-color: rgba(240,240,240,0.2);
+		border: 1px solid rgba(0,0,0,0.2);
+
+		.tag-label {
+			background-color: rgba(0,0,120,0.6);
+			color: #d8d8d8;
+			padding: 6px;
+		}
+
+		.tag-value {
+
+		}
+	}
 </style>
 
 <section>
 	{#if z_error}
 		Error: {z_error.message}
 	{:else if g_subscribe}
-		<div>
-			<span>
-				Query:
+		<div class="header">
+			<span class="controls">
+				{#if b_stopped}
+					<button>
+						<img src="/icon/restart.svg" alt="Restart">
+						Restart
+					</button>
+				{:else}
+					<button on:click={unsubscribe}>
+						<img src="/icon/stop.svg" alt="Stop">
+						Stop
+					</button>
+				{/if}
+
+				<button on:click={close}>
+					<img src="/icon/cancel.svg" alt="Close">
+					Close
+				</button>
+
+				<button on:click={reverse_order}>
+					<img src="/icon/swap.svg" alt="Reverse order">
+					{b_reverse_order? 'Newest': 'Oldest'}
+				</button>
 			</span>
-			<code>{g_subscription.query.replace(/\n+/g, ' ')}</code>
+
+			<span class="tagged-group">
+				<span class="tagged-value">
+					<span class="tag-label">
+						Query:
+					</span>
+					<span class="tag-value">
+						<code>{g_subscription.query.replace(/\n+/g, ' ')}</code>
+					</span>
+				</span>
+
+				<span class="tagged-value">
+					<span class="tag-label">
+						Matches:
+					</span>
+					<span class="tag-value">
+						<code>{a_txs.length}</code>
+					</span>
+				</span>
+			</span>
 		</div>
 
 		{#if a_txs.length}
@@ -222,7 +368,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each a_txs as g_tx (g_tx.hash)}
+					{#each a_txs.slice().reverse() as g_tx (g_tx.hash)}
 						<tr>
 							<td>
 								{g_tx.height}

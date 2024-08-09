@@ -30,6 +30,7 @@
 	let k_rpc: JsonRpc<JsonRpcClient, ServiceVocab>;
 
 	let h_subscriptions: Dict<LiveSubscription> = {};
+	let s_subscription_selected = '';
 
 	onMount(async() => {
 		k_rpc = await open_ws_rpc();
@@ -72,21 +73,12 @@
 	
 				// invalidate
 				h_subscriptions = h_subscriptions;
+
+				// set selected subsription
+				s_subscription_selected = s_canonical;
 			}
 		}
 	}
-
-	// async function search_txs(d_event: CustomEvent<string>) {
-
-
-	// 	const g_search = await k_rpc.call('search_txs', {
-	// 		query: d_event.detail,
-	// 	}, (g_stream) => {
-	// 		debugger;
-	// 	});
-
-	// 	console.log(g_search);
-	// }
 </script>
 
 <style lang="less">
@@ -173,7 +165,15 @@
 		<Editor {k_rpc} on:submit={submit_query} />
 
 		{#each entries(h_subscriptions) as [s_canonical, g_subscription] (s_canonical)}
-			<Subscription {k_rpc} {g_subscription} />
+			{#if s_subscription_selected === s_canonical}
+				<Subscription {k_rpc} {g_subscription} on:close={() => {
+					// remove from dict
+					delete h_subscriptions[s_canonical];
+
+					// invalidate
+					h_subscriptions = h_subscriptions;
+				}} />
+			{/if}
 		{/each}
 	</main>
 {:else}

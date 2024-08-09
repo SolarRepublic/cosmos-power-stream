@@ -151,6 +151,31 @@ BEGIN
 END;
 $body$ LANGUAGE plpgsql;
 
+-- event filter function for 'exists' operation
+SELECT create_filter_func(
+	symbol => 'filter_event_path_exists',
+	params => '_ignore TEXT',
+	outputs => 'path_text TEXT',
+	selection => 'p.path_text',
+	inject => 'TRUE',
+);
+
+-- -- event filter function for 'not exists' operation
+-- CREATE OR REPLACE FUNCTION filter_func_path_not_exists(
+-- 	_path_text TEXT
+-- ) RETURNS TABLE (
+-- 	tx_id BIGINT
+-- ) AS $query$
+-- 	BEGIN
+-- 		RETURN QUERY
+-- 		SELECT e.tx_id
+-- 		FROM events e
+-- 		INNER JOIN event_paths p on e.path_id = p.id
+-- 		WHERE
+-- 			p.path_text 
+-- 	END;
+-- $query$ LANGUAGE plpgsql STABLE PARALLEL SAFE;
+
 -- generate an event filter function for each inequality type
 SELECT create_filter_func_inequality('filter_event_quantity_lt', '<');
 SELECT create_filter_func_inequality('filter_event_quantity_gt', '>');
