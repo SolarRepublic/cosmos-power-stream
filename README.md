@@ -17,15 +17,91 @@ Blockchains built on the Tendermint/CometBFT stack (i.e., Cosmos-SDK) have a pow
 ![Advantages of multiplexing](docs/multiplexing.png)
 
 
-## Getting Started
+## Quick Setup
 
-Install:
-```sh
-bun install
+```bash
+# clone this repository
+git clone https://github.com/SolarRepublic/cosmos-power-stream
+
+# change directory
+cd cosmos-power-stream
+
+# launch the service set using Docker Compose
+UPSTREAM_RPC_NODE="https://rpc.mainnet.secretsaturn.net" docker-compose up
 ```
 
-Build:
-```sh
-bun run build
+Then, open a web browser to http://localhost:8080/ .
+
+
+## Advanced Setup
+
+Check the docker-compose.yaml file for insight into how these services work together. The following section is for documenting each service more thoroughly for users who require more advanced setups.
+
+
+#### Prepare the database
+
+The database stores recently indexed transactions to allow clients to search for events back in time.
+
+```bash
+docker run -d \
+	-p 5432:5432 \
+	solar-republic/cosmos-power-stream-db:postgres
 ```
+
+
+#### Run the service
+
+The main service acts as a multiplexing relay, consuming events from the origin Tendermint/CometBFT WebSocket and replaying them to all subscribed clients. It also provides [additional functionality](#service-features) to clients.
+
+```bash
+docker run -d \
+	-p 26659:26659 \
+	-e UPSTREAM_RPC_NODE={UPSTREAM_RPC_NODE} \
+	-e POSTGRES_HOST={POSTGRES_HOST} \
+	-e POSTGRES_DATABASE={POSTGRES_DATABASE} \
+	-e POSTGRES_USER={POSTGRES_USER} \
+	-e POSTGRES_PASSWORD={POSTGRES_PASSWORD} \
+	solar-republic/cosmos-power-stream-app \
+	npm run host
+```
+
+If you running this on an RPC node, you can safely redirect to this service via reverse proxy for incoming requests to `/websocket`.
+
+
+#### Run an indexer (optional)
+
+Runs a node.js process that subscribes to events on the given WebSocket and indexes transactions into the configured Postgres database.
+
+> NOTE: You will need to configure network access so that the docker container can reach the database.
+
+```bash
+docker run -d \
+	-e UPSTREAM_RPC_NODE={UPSTREAM_RPC_NODE} \
+	-e POSTGRES_HOST={POSTGRES_HOST} \
+	-e POSTGRES_DATABASE={POSTGRES_DATABASE} \
+	-e POSTGRES_USER={POSTGRES_USER} \
+	-e POSTGRES_PASSWORD={POSTGRES_PASSWORD} \
+	solar-republic/cosmos-power-stream-app \
+	npm run index
+```
+
+
+#### Host the frontend
+
+The frontend web application provides an interactive query building GUI and sandbox for developers to experiment with the service's features.
+
+```bash
+doker run -d 80:80 \
+	solar-republic/cosmos-power-stream-ui
+```
+
+
+#### Building from source
+
+```bash
+./build-docker.sh
+```
+
+## Service Features
+
 

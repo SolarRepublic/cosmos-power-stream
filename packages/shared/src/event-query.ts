@@ -482,12 +482,14 @@ export class EventQuery {
 				}
 				// not exists
 				else if('not exists' === s_op) {
-					sx_condition = `!!${sx_accesor}.length`;
+					sx_condition = `!${sx_accesor}.length`;
 				}
 				// unhandled
 				else {
 					throw Error(`Unsupported operand "${s_op}"`);
 				}
+
+				debugger;
 
 				return sx_condition;
 			},
@@ -495,8 +497,7 @@ export class EventQuery {
 	}
 
 	toFunction(): QueryFunction {
-		// eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
-		return new Function('h_events', 'g_scope', `
+		const sx_source = `
 			// cache of quantities
 			const h_quantity_cache = Object.create(null);
 
@@ -514,7 +515,10 @@ export class EventQuery {
 			};
 
 			return ${this.toJs()};
-		`) as (h_events: Dict<String[]>) => boolean;
+		`;
+
+		// eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+		return new Function('h_events', 'g_scope', sx_source) as (h_events: Dict<String[]>) => boolean;
 
 		// const h_events: Dict<string[]> = {};
 			// // cache of quantities
@@ -570,17 +574,22 @@ export class EventQuery {
 				// or, the entire condition
 				let sx_condition = '';
 
+				// whether the operation is being negated
+				let b_not = false;
+
 				// unary
 				if(A_OPERATORS_UNARY.includes(s_op as QueryExprOperatorUnary)) {
+					// existential condition
+					sx_condition = `filter_event_path_exists(${this.param(s_key)}, '')`;
+
 					// exists
 					if('exists' === s_op) {
-						// sx_condition = `p.path_text=${this.param(s_key)}`;
-						sx_condition = `filter_event_path_exists(${this.param(s_key)}, '')`;
+						// no-op
 					}
 					// not exists
 					else if('not exists' === s_op) {
-
-						debugger;
+						// invert match
+						b_not = true;
 					}
 					// other
 					else {
@@ -658,7 +667,8 @@ export class EventQuery {
 				let s_join_type = 'left';
 
 				// check for contiguity from root to leaf node
-				CONTIGUOUS: {
+				CONTIGUOUS:
+				if(!b_not) {
 					// each node in ancestry
 					for(const g_node of a_ancestry) {
 						// anything other than an AND type; not contiguous
@@ -672,8 +682,8 @@ export class EventQuery {
 				// create join
 				a_joins.push(`${s_join_type} join ${sx_condition} x${n_id} on x${n_id}.tx_id = t.id`);
 
-				// add condition
-				return `x${n_id}.tx_id IS NOT NULL`;
+				// add condition (inverse in case of 'not')
+				return `x${n_id}.tx_id IS ${b_not? '': 'NOT'} NULL`;
 			},
 		});
 

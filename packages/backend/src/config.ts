@@ -16,7 +16,7 @@ export const GC_APP: AppConfig = {
 	upstream: {
 		nodes: [
 			{
-				url: 'http://10.0.0.23:26657',
+				url: (process.env['UPSTREAM_RPC_NODE'] || 'http://localhost:26657') as TrustedContextUrl,
 			},
 		],
 	},

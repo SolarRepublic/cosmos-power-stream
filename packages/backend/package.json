@@ -4,12 +4,12 @@
   "type": "module",
   "version": "0.1.0",
   "scripts": {
-    "build:docker-db": "docker build -t postgres-wsm .",
-    "run:docker-db": "docker run --name postgres-wsm -d -p 5432:5432 postgres-wsm",
-    "build:app": "tsc && tsc-esm-fix --target=dist",
-    "build": "bun run build:docker-db",
-    "test": "bun run run:docker-db && bun run start",
-    "start": "bun run src/indexer.ts"
+    "build:docker-db": "docker build -t solar-republic/cosmos-power-stream-db:postgres .",
+    "run:docker-db": "docker run --rm --name power-stream-db -d -p 5432:5432 solar-republic/cosmos-power-stream-db:postgres",
+    "build": "tsc && tsc-esm-fix --target=dist",
+    "test": "pnpm run run:docker-db && pnpm run build && pnpm run start",
+    "host": "node dist/backend/src/server.js",
+    "index": "node dist/backend/src/indexer.js"
   },
   "devDependencies": {
     "@blake.regalia/eslint-config-elite": "^0.4.4",
@@ -19,8 +19,10 @@
     "@solar-republic/types": "^0.2.12",
     "@types/bun": "latest",
     "@types/pg": "^8.11.6",
+    "@types/ws": "^8.5.12",
     "eslint": "8",
-    "ts-toolbelt": "^9.6.0"
+    "ts-toolbelt": "^9.6.0",
+    "tsc-esm-fix": "^3.0.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

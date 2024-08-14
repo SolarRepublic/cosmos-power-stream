@@ -157,7 +157,7 @@ SELECT create_filter_func(
 	params => '_ignore TEXT',
 	outputs => 'path_text TEXT',
 	selection => 'p.path_text',
-	inject => 'TRUE',
+	inject => 'TRUE'
 );
 
 -- -- event filter function for 'not exists' operation

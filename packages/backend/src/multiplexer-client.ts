@@ -221,14 +221,15 @@ export const H_ROUTING: JsonRpcRouter<MultiplexerClient, ServiceVocab> = {
 						result: g_result,
 					} = decode_txres(atu8_tx_data);
 
-					if(as_seen.has(si_row)) {
-						debugger;
-					}
+					// if(as_seen.has(si_row)) {
+					// 	debugger;
+					// }
 
+					// add to set
 					as_seen.add(si_row);
 
 					// inspect the type of `g_result.log`
-					debugger;
+					// debugger;
 
 					// reconstruct transaction
 					h_txs[si_row] = {

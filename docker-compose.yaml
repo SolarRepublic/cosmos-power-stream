@@ -1,0 +1,23 @@
+services:
+  database:
+    image: solar-republic/cosmos-power-stream-db:postgres
+  indexer:
+    image: solar-republic/cosmos-power-stream-app
+    command: "npm run index"
+    environment:
+      - POSTGRES_HOST=database
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+  service:
+    image: solar-republic/cosmos-power-stream-app
+    command: "npm run host"
+    environment:
+      - POSTGRES_HOST=database
+      - UPSTREAM_RPC_NODE=${UPSTREAM_RPC_NODE}
+    ports:
+      - "26759:26659"
+  host:
+    image: solar-republic/cosmos-power-stream-ui
+    ports:
+      - "8080:80"

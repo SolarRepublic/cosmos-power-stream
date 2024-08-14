@@ -1,0 +1,15 @@
+:80 {
+	@websocket {
+		path /websocket
+	}
+
+	reverse_proxy @websocket service:26659
+
+	root * /srv
+
+	file_server
+}
+
+:26658 {
+	reverse_proxy service
+}

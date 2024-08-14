@@ -1,13 +1,15 @@
 <script lang="ts">
 	import type {WeakUintStr} from '@solar-republic/types';
-	import type {JsonRpc, JsonRpcClient, JsonRpcError} from '../../../shared/src/json-rpc';
-	import type {ServiceVocab} from '../../../shared/src/vocab';
+	import type {JsonRpc, JsonRpcClient, JsonRpcError} from '#shared/json-rpc';
+	import type {ServiceVocab} from '#shared/vocab';
+	import type {AstNode} from '#shared/event-query';
 	import type {LiveSubscription} from '../types';
 
 	import {try_async, deduplicate, try_sync} from '@blake.regalia/belt';
 	import {createEventDispatcher, onMount} from 'svelte';
-	import {walk, type AstNode} from '../../../shared/src/event-query';
-	import {block_explorer_tx} from '../util';
+
+	import {walk} from '../../shared/dist/event-query.js';
+	import {block_explorer_tx} from '../util.js';
 
 	export let k_rpc: JsonRpc<JsonRpcClient, ServiceVocab>;
 	export let g_subscription: LiveSubscription;

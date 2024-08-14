@@ -1,5 +1,5 @@
 import pg from 'pg';
-const {Client, types} = pg;
+const {Client} = pg;
 
 export const Y_POSTGRES = new Client({
 	host: process.env.POSTGRES_HOST || 'localhost',

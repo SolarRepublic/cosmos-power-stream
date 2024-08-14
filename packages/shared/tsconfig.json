@@ -17,16 +17,11 @@
 
 		"skipDefaultLibCheck": true,
 		"skipLibCheck": true,
-
-		"paths": {
-			"#shared/*": ["./shared/src/*"],
-		}
 	},
 
 	"include": [
 		"src/**/*.ts",
 		"src/**/*.svelte",
-		"./shared/src/**/*.ts",
 		"*.ts",
 		".eslintrc.cjs",
 	],

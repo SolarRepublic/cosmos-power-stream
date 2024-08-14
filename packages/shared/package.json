@@ -1,0 +1,13 @@
+{
+	"name": "cosmos-ws-multiplixer-shared",
+	"type": "module",
+	"devDependencies": {
+		"@blake.regalia/tsconfig": "^0.2.0",
+		"@solar-republic/neutrino": "^1.5.3",
+		"ts-toolbelt": "^9.6.0"
+	},
+	"dependencies": {
+		"@blake.regalia/belt": "^0.38.1",
+		"@noble/hashes": "^1.4.0"
+	}
+}

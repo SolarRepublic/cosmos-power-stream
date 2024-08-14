@@ -3,10 +3,10 @@
 	import type {JsonRpc, JsonRpcClient} from '../../../shared/src/json-rpc';
 	import type {ServiceVocab} from '../../../shared/src/vocab';
 	
-	import {entries, stringify_json, try_async} from '@blake.regalia/belt';
+	import {entries, is_dict, is_object, is_string, stringify_json, try_async} from '@blake.regalia/belt';
 	import {onMount} from 'svelte';
 
-	import {open_ws_rpc} from '../rpc-client';
+	import {open_ws_rpc} from '../rpc-client.js';
 
 	import Editor from './Editor.svelte';
 	import Subscription from './Subscription.svelte';
@@ -43,6 +43,10 @@
 		document.title += `: ${si_chain}`;
 	});
 
+	const is_json_rpc_error = (e: unknown): e is {message: string; data: string} => is_dict(e) && is_string(e['message']);
+
+	let s_err_submit = '';
+
 	async function submit_query(d_event: CustomEvent<string>) {
 		// query string
 		const s_query = d_event.detail;
@@ -50,8 +54,12 @@
 		// try parsing
 		let [g_ast, e_parse] = await try_async(() => k_rpc.call('parse_query', {query:s_query}));
 
+		// reset error
+		s_err_submit = '';
+
 		// invalid query
 		if(e_parse) {
+			s_err_submit = is_json_rpc_error(e_parse)? `${e_parse.message}: ${e_parse.data}`: `Unknown error: ${e_parse}`;
 			console.error(e_parse);
 		}
 		// valid query
@@ -120,6 +128,12 @@
 		margin: 0 8px;
 		font-size: 26px;
 	}
+
+	.error {
+		background-color: #c32a3e;
+		color: #f1b8d1;
+		padding: 6px;
+	}
 </style>
 
 
@@ -129,7 +143,7 @@
 			<h1>
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<span class="mascot" style:filter={a_filters[i_filter]} on:click={change_filter}>
-					<img src="../public/mascot.png" alt="Mascot" height="64">
+					<img src="/mascot.png" alt="Mascot" height="64">
 				</span>
 				<span>
 					Cosmos Power Stream
@@ -163,6 +177,12 @@
 {#if k_rpc}
 	<main>
 		<Editor {k_rpc} on:submit={submit_query} />
+
+		{#if s_err_submit}
+			<div class="error">
+				{s_err_submit}
+			</div>
+		{/if}
 
 		{#each entries(h_subscriptions) as [s_canonical, g_subscription] (s_canonical)}
 			{#if s_subscription_selected === s_canonical}
