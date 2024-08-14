@@ -1,4 +1,7 @@
 {
+	"scripts": {
+		"init-db:postgres": "psql $@ -f ./packages/backend/database/postgres/init.sql"
+	},
 	"devDependencies": {
 		"monaco-editor": "^0.50.0"
 	},

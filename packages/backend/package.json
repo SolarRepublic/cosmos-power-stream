@@ -4,8 +4,8 @@
   "type": "module",
   "version": "0.1.0",
   "scripts": {
-    "build:docker-db": "docker build -t solar-republic/cosmos-power-stream-db:postgres .",
-    "run:docker-db": "docker run --rm --name power-stream-db -d -p 5432:5432 solar-republic/cosmos-power-stream-db:postgres",
+    "build:docker-db": "docker build -t solar-republic/cosmos-power-stream-db-postgres .",
+    "run:docker-db": "docker run --rm --name power-stream-db -d -p 5432:5432 solar-republic/cosmos-power-stream-db-postgres",
     "build": "tsc && tsc-esm-fix --target=dist",
     "test": "pnpm run run:docker-db && pnpm run build && pnpm run start",
     "host": "node dist/backend/src/server.js",

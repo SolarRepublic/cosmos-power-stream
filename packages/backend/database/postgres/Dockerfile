@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1
+LABEL org.opencontainers.image.source=https://github.com/SolarRepublic/cosmos-power-stream
+
 FROM postgres:latest
 
 ENV POSTGRES_DATABASE=wsm

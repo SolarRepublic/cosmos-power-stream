@@ -42,10 +42,22 @@ Check the docker-compose.yaml file for insight into how these services work toge
 
 The database stores recently indexed transactions to allow clients to search for events back in time.
 
+If you want to use a local database (recommended), you can initialize it from the root directory of this repository with the npm script:
+
+```bash
+npm run init-db:postgres $CONNECTION_URL
+```
+
+Where `CONNECTION_URL` is a postgres connection URL such as `postgresql://user@localhost:5432/database`. Note that `database` is just where the user can connect, the command will create a new database named `wsm`.
+
+**OR**
+
+If you prefer a simpler setup with quicker teardown, run the docker image:
+
 ```bash
 docker run -d \
 	-p 5432:5432 \
-	solar-republic/cosmos-power-stream-db:postgres
+	solar-republic/cosmos-power-stream-db-postgres
 ```
 
 

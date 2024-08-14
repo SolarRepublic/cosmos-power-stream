@@ -1,6 +1,6 @@
 services:
   database:
-    image: solar-republic/cosmos-power-stream-db:postgres
+    image: solar-republic/cosmos-power-stream-db-postgres
   indexer:
     image: solar-republic/cosmos-power-stream-app
     command: "npm run index"
