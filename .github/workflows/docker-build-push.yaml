@@ -15,7 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Docker buildx
         uses: docker/setup-buildx-action@v3
@@ -41,7 +44,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push app
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./app.Dockerfile
@@ -59,7 +62,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push frontend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./frontend.Dockerfile
@@ -77,10 +80,9 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push db
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./packages/backend/database/postgres
-          file: Dockerfile
           push: true
           tags: ${{ steps.meta_db.outputs.tags }}
           labels: ${{ steps.meta_db.outputs.labels }}
