@@ -33,26 +33,31 @@ UPSTREAM_RPC_NODE="https://rpc.mainnet.secretsaturn.net" docker-compose up
 Then, open a web browser to http://localhost:8080/ .
 
 
-## Advanced Setup
+## Advanced Setup: Raw
 
-Check the docker-compose.yaml file for insight into how these services work together. The following section is for documenting each service more thoroughly for users who require more advanced setups.
-
+Requires building each component from source and running locally.
 
 #### Prepare the database
 
 The database stores recently indexed transactions to allow clients to search for events back in time.
 
-If you want to use a local database (recommended), you can initialize it from the root directory of this repository with the npm script:
+Start by initializing the database from the root directory of this repository with the npm script:
 
 ```bash
 npm run init-db:postgres $CONNECTION_URL
 ```
 
-Where `CONNECTION_URL` is a postgres connection URL such as `postgresql://user@localhost:5432/database`. Note that `database` is just where the user can connect, the command will create a new database named `wsm`.
+Where `CONNECTION_URL` is a postgres connection URL such as `postgresql://user@localhost:5432/database`. Note that `database` is just where the user can connect, the command will create a new database named `cosmos_power_stream`.
 
-**OR**
 
-If you prefer a simpler setup with quicker teardown, run the docker image:
+
+## Advanced Setup: Docker Images
+
+Check the docker-compose.yaml file for insight into how these services work together. The following section is for documenting each service more thoroughly for users who require more advanced setups.
+
+#### Prepare the database
+
+The database stores recently indexed transactions to allow clients to search for events back in time.
 
 ```bash
 docker run -d \

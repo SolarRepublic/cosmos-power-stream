@@ -9,6 +9,8 @@ export default defineConfig(({mode}) => {
 	const B_DEV = 'development' === mode;
 
 	return {
+		base: B_DEV? '/': '/websocket/',
+
 		build: {
 			outDir: resolve(__dirname, 'dist'),
 			emptyOutDir: false,

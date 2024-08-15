@@ -1,0 +1,15 @@
+# /etc/systemd/system/cosmos-power-stream-indexer.service
+[Unit]
+Description=Cosmos Power Stream Indexer
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/cosmos-power-stream/packages/backend
+ExecStart=/usr/bin/pnpm run index
+Restart=on-failure
+Environment=POSTGRES_USER=cosmos
+
+[Install]
+WantedBy=multi-user.target

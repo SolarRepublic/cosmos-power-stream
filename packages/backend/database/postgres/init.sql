@@ -1,6 +1,6 @@
-CREATE DATABASE wsm;
+CREATE DATABASE cosmos_power_stream;
 
-\c wsm;
+\c cosmos_power_stream;
 
 -- stores data about each individual transaction
 CREATE TABLE transactions(
