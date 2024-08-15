@@ -1,5 +1,4 @@
 # syntax=docker/dockerfile:1
-LABEL org.opencontainers.image.source=https://github.com/SolarRepublic/cosmos-power-stream
 
 # base image node LTS v22.4
 FROM node:22.4-alpine3.19
