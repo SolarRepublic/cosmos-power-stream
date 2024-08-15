@@ -6,7 +6,7 @@
 	import {entries, is_dict, is_object, is_string, stringify_json, try_async} from '@blake.regalia/belt';
 	import {onMount} from 'svelte';
 
-	import {open_ws_rpc} from '../rpc-client.js';
+	import {open_ws_rpc} from '../rpc-client';
 
 	import Editor from './Editor.svelte';
 	import Subscription from './Subscription.svelte';

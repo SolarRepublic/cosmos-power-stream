@@ -54,7 +54,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ env.IMAGE_PREFIX }}/frontned
+            ${{ env.IMAGE_PREFIX }}/frontend
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
 

@@ -8,8 +8,8 @@
 	import {try_async, deduplicate, try_sync} from '@blake.regalia/belt';
 	import {createEventDispatcher, onMount} from 'svelte';
 
-	import {walk} from '../../shared/dist/event-query.js';
-	import {block_explorer_tx} from '../util.js';
+	import {walk} from '../../shared/src/event-query';
+	import {block_explorer_tx} from '../util';
 
 	export let k_rpc: JsonRpc<JsonRpcClient, ServiceVocab>;
 	export let g_subscription: LiveSubscription;

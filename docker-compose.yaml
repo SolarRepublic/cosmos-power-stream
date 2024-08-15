@@ -1,8 +1,8 @@
 services:
   database:
-    image: solar-republic/cosmos-power-stream-db-postgres
+    image: ghcr.io/solarrepublic/cosmos-power-stream/db-postgres
   indexer:
-    image: solar-republic/cosmos-power-stream-app
+    image: ghcr.io/solarrepublic/cosmos-power-stream/app
     command: "npm run index"
     environment:
       - POSTGRES_HOST=database
@@ -10,7 +10,7 @@ services:
     volumes:
       - ./pgdata:/var/lib/postgresql/data
   service:
-    image: solar-republic/cosmos-power-stream-app
+    image: ghcr.io/solarrepublic/cosmos-power-stream/app
     command: "npm run host"
     environment:
       - POSTGRES_HOST=database
@@ -18,6 +18,6 @@ services:
     ports:
       - "26759:26659"
   host:
-    image: solar-republic/cosmos-power-stream-ui
+    image: ghcr.io/solarrepublic/cosmos-power-stream/frontend
     ports:
       - "8080:80"

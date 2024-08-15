@@ -7,8 +7,8 @@
 	import {createEventDispatcher, onDestroy, onMount} from 'svelte';
 	import {text_to_bytes, bytes_to_base64} from '@blake.regalia/belt';
 
-	import {register_powerstreamql, SI_POWERSTREAMQL_LANGUAGE, SI_POWERSTREAMQL_THEME} from '../powerstreamql.js';
-	import monaco from '../monaco.js';
+	import {register_powerstreamql, SI_POWERSTREAMQL_LANGUAGE, SI_POWERSTREAMQL_THEME} from '../powerstreamql';
+	import monaco from '../monaco';
 
 	export let k_rpc: JsonRpc<JsonRpcClient, ServiceVocab>;
 
