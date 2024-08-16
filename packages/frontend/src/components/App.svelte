@@ -143,7 +143,7 @@
 			<h1>
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<span class="mascot" style:filter={a_filters[i_filter]} on:click={change_filter}>
-					<img src="/mascot.png" alt="Mascot" height="64">
+					<img src="mascot.png" alt="Mascot" height="64">
 				</span>
 				<span>
 					Cosmos Power Stream
