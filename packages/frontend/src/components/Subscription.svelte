@@ -316,23 +316,23 @@
 			<span class="controls">
 				{#if b_stopped}
 					<button>
-						<img src="/icon/restart.svg" alt="Restart">
+						<img src="icon/restart.svg" alt="Restart">
 						Restart
 					</button>
 				{:else}
 					<button on:click={unsubscribe}>
-						<img src="/icon/stop.svg" alt="Stop">
+						<img src="icon/stop.svg" alt="Stop">
 						Stop
 					</button>
 				{/if}
 
 				<button on:click={close}>
-					<img src="/icon/cancel.svg" alt="Close">
+					<img src="icon/cancel.svg" alt="Close">
 					Close
 				</button>
 
 				<button on:click={reverse_order}>
-					<img src="/icon/swap.svg" alt="Reverse order">
+					<img src="icon/swap.svg" alt="Reverse order">
 					{b_reverse_order? 'Newest': 'Oldest'}
 				</button>
 			</span>

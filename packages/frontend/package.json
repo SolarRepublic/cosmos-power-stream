@@ -26,6 +26,7 @@
     "@noble/hashes": "^1.4.0",
     "@solar-republic/types": "^0.2.12",
     "monaco-editor": "^0.50.0",
+    "svelte-markdown": "^0.4.1",
     "vite-tsconfig-paths": "^5.0.1"
   }
 }

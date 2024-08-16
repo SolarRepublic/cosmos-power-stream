@@ -5,11 +5,14 @@
 	
 	import {entries, is_dict, is_object, is_string, stringify_json, try_async} from '@blake.regalia/belt';
 	import {onMount} from 'svelte';
+	import SvelteMarkdown from 'svelte-markdown';
 
 	import {open_ws_rpc} from '../rpc-client';
 
 	import Editor from './Editor.svelte';
 	import Subscription from './Subscription.svelte';
+
+	import SX_QUERY_DOCUMENTATION_MD from '../../QUERYING.md?raw';
 
 
 	let sx_mascot_filter = '';
@@ -32,8 +35,12 @@
 	let h_subscriptions: Dict<LiveSubscription> = {};
 	let s_subscription_selected = '';
 
+	let s_error = '';
+
 	onMount(async() => {
-		k_rpc = await open_ws_rpc();
+		k_rpc = await open_ws_rpc(() => {
+			s_error = 'WebSocket connection closed. Reload page to reconnect.';
+		});
 
 		const g_info = await k_rpc.call('power_stream_info', {});
 
@@ -134,6 +141,28 @@
 		color: #f1b8d1;
 		padding: 6px;
 	}
+
+	main {
+		display: flex;
+		gap: 6px;
+	}
+
+	.action {
+		flex: 3;
+		max-width: 800px;
+	}
+
+	.docs {
+		flex: 1;
+		border: 1px solid rgba(250, 250, 250, 0.2);
+		border-radius: 4px;
+		padding: 6px;
+		background-color: rgba(0,0,0,0.4);
+
+		h1 {
+			font-size: 1.5em;
+		}
+	}
 </style>
 
 
@@ -174,27 +203,37 @@
 	</div>
 </header>
 
-{#if k_rpc}
+{#if s_error}
+	<div class="error">
+		{s_error}
+	</div>
+{:else if k_rpc}
 	<main>
-		<Editor {k_rpc} on:submit={submit_query} />
-
-		{#if s_err_submit}
-			<div class="error">
-				{s_err_submit}
-			</div>
-		{/if}
-
-		{#each entries(h_subscriptions) as [s_canonical, g_subscription] (s_canonical)}
-			{#if s_subscription_selected === s_canonical}
-				<Subscription {k_rpc} {g_subscription} on:close={() => {
-					// remove from dict
-					delete h_subscriptions[s_canonical];
-
-					// invalidate
-					h_subscriptions = h_subscriptions;
-				}} />
+		<div class="action">
+			<Editor {k_rpc} on:submit={submit_query} />
+	
+			{#if s_err_submit}
+				<div class="error">
+					{s_err_submit}
+				</div>
 			{/if}
-		{/each}
+	
+			{#each entries(h_subscriptions) as [s_canonical, g_subscription] (s_canonical)}
+				{#if s_subscription_selected === s_canonical}
+					<Subscription {k_rpc} {g_subscription} on:close={() => {
+						// remove from dict
+						delete h_subscriptions[s_canonical];
+	
+						// invalidate
+						h_subscriptions = h_subscriptions;
+					}} />
+				{/if}
+			{/each}
+		</div>
+
+		<div class="docs">
+			<SvelteMarkdown source={SX_QUERY_DOCUMENTATION_MD} />
+		</div>
 	</main>
 {:else}
 	<h1>Connecting...</h1>

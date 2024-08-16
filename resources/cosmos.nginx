@@ -38,6 +38,9 @@ server {
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection "upgrade";
 
+		proxy_read_timeout 3600s;
+		proxy_send_timeout 3600s;
+
 		alias /var/www/html/cosmos-power-stream;
 		try_files $uri $uri/ =404;
 	}

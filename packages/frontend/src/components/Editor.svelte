@@ -123,6 +123,10 @@
 </script>
 
 <style lang="less">
+	.root {
+		max-width: 800px;
+	}
+
 	.container {
 		width: 100%;
 		max-width: 800px;
@@ -159,7 +163,7 @@
 	}
 </style>
 
-<div>
+<div class="root">
 	<div class="tabs">
 		<ul role="tablist" class="tabs">
 			{#each a_tabs as g_tab}
