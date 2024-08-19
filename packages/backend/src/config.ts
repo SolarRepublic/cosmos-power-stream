@@ -28,3 +28,7 @@ export const GC_APP: AppConfig = {
 export const N_SEARCH_BATCH_SIZE = 256;
 
 export const N_ATTRIBUTE_LIMIT_MAX = 1024;
+
+export const X_MAX_TX_AGE_HOURS = 14 * 24;
+
+export const XT_HOUSECLEAN_INTERVAL = 1 * 60 * 60e3;

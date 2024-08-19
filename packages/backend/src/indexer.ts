@@ -1,5 +1,6 @@
 import {F_IDENTITY, __UNDEFINED, base64_to_bytes, bytes_to_base64, bytes_to_text, collapse, entries, sha256, text_to_bytes} from '@blake.regalia/belt';
 
+import {X_MAX_TX_AGE_HOURS, XT_HOUSECLEAN_INTERVAL} from './config';
 import {encode_txres} from './encoding';
 import {Y_POSTGRES, psql_params} from './postgres';
 import {K_TES_TX} from './upstream';
@@ -199,3 +200,12 @@ K_TES_TX.register({
 		console.timeEnd(si_hash);
 	},
 });
+
+// housecleaning
+setInterval(async() => {
+	// remove old transactions
+	await Y_POSTGRES.query(`
+		DELETE FROM transactions
+		WHERE timestamp < NOW() - INTERVAL $1
+	`, [`${X_MAX_TX_AGE_HOURS} hours`]);
+}, XT_HOUSECLEAN_INTERVAL);
