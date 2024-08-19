@@ -59,6 +59,11 @@
 		g_tab_selected = g_tab;
 	}
 
+	function try_execute() {
+		const s_query = g_tab_selected?.model.getValue();
+		if(s_query) dispatch('submit', s_query);
+	}
+
 	onMount(async () => {
 		y_monaco = (await import('../monaco')).default;
 
@@ -86,8 +91,7 @@
 			label: 'Search and Subscribe',
 			keybindings: [y_monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
 			run() {
-				const s_query = g_tab_selected?.model.getValue();
-				if(s_query) dispatch('submit', s_query);
+				try_execute();
 			},
 		});
 
@@ -139,6 +143,7 @@
 		display: flex;
 		margin: 0;
 		padding: 0;
+		justify-content: space-between;
 
 		>li {
 			margin: 0;
@@ -160,6 +165,13 @@
 				}
 			}
 		}
+	}
+
+	button.execute {
+		background: rgba(200, 200, 200, 0.1);
+		border: 1px solid #a19ffe;
+		color: #a19ffe;
+		padding: 6px 14px;
 	}
 </style>
 
@@ -184,6 +196,10 @@
 				</a>
 			</li>
 		</ul>
+
+		<button class="execute" on:click={try_execute}>
+			Execute
+		</button>
 	</div>
 
 	<div class="container" bind:this={dm_editor} />
