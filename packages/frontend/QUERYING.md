@@ -1,6 +1,8 @@
+# Welcome
+
 This service extends the [Tendermint/CometBFT events stream](https://docs.cometbft.com/v0.37/core/subscription) over WebSocket, indexing events on the server and allowing clients to search for transactions back in time by their event attributes. The query syntax also extends the original, allowing developers to write complex filters. The endpoint is fully backwards-compatible with the original `/websocket` endpoint.
 
-# GUI
+# User Interface
 
 You can use this web application to write and test queries against live and historical data.
 

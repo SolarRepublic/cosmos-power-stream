@@ -160,7 +160,15 @@
 		background-color: rgba(0,0,0,0.4);
 
 		h1 {
-			font-size: 1.5em;
+			:global(&) {
+				font-size: 1.5em;
+			}
+		}
+
+		a {
+			:global(&) {
+				color: aliceblue;
+			}
 		}
 	}
 </style>
